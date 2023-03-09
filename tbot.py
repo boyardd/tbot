@@ -40,18 +40,22 @@ def select_service(message):
     else:
         markup = types.ReplyKeyboardMarkup(row_width=2)
         itembtns = [types.KeyboardButton(master) for master in services[service].keys()]
+        itembtns.append(types.KeyboardButton('Назад'))
         markup.add(*itembtns)
         msg = bot.send_message(message.chat.id, "Выберите мастера для {}:".format(service), reply_markup=markup)
         bot.register_next_step_handler(msg, select_master, service)
 
 # Обработчик выбора мастера
 def select_master(message, service):
-    master = message.text
-    if master not in services[service].keys():
-        msg = bot.send_message(message.chat.id, "Пожалуйста, выберите мастера из предложенных в меню.")
-        bot.register_next_step_handler(msg, select_master, service)
+    if message.text == 'Назад':
+        send_welcome(message)
     else:
-        price = services[service][master]
-        bot.send_message(message.chat.id, "Вы выбрали {} у мастера {}. Стоимость: {} руб.".format(service, master, price))
+        master = message.text
+        if master not in services[service].keys():
+            msg = bot.send_message(message.chat.id, "Пожалуйста, выберите мастера из предложенных в меню.")
+            bot.register_next_step_handler(msg, select_master, service)
+        else:
+            price = services[service][master]
+            bot.send_message(message.chat.id, "Вы выбрали {} у мастера {}. Стоимость: {} руб.".format(service, master, price))
 
 bot.polling()
