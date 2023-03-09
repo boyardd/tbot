@@ -40,22 +40,29 @@ def select_service(message):
     else:
         markup = types.ReplyKeyboardMarkup(row_width=2)
         itembtns = [types.KeyboardButton(master) for master in services[service].keys()]
-        itembtns.append(types.KeyboardButton('Назад'))
+        itembtns.append(types.KeyboardButton("Назад"))
         markup.add(*itembtns)
         msg = bot.send_message(message.chat.id, "Выберите мастера для {}:".format(service), reply_markup=markup)
         bot.register_next_step_handler(msg, select_master, service)
 
 # Обработчик выбора мастера
+
 def select_master(message, service):
-    if message.text == 'Назад':
-        send_welcome(message)
-    else:
-        master = message.text
-        if master not in services[service].keys():
-            msg = bot.send_message(message.chat.id, "Пожалуйста, выберите мастера из предложенных в меню.")
-            bot.register_next_step_handler(msg, select_master, service)
-        else:
-            price = services[service][master]
-            bot.send_message(message.chat.id, "Вы выбрали {} у мастера {}. Стоимость: {} руб.".format(service, master, price))
+master = message.text
+if master not in services[service].keys():
+msg = bot.send_message(message.chat.id, "Пожалуйста, выберите мастера из предложенных в меню или нажмите кнопку Назад.", reply_markup=back_button)
+bot.register_next_step_handler(msg, select_master, service)
+else:
+selected_master = {"service": service, "master": master}
+markup = types.InlineKeyboardMarkup(row_width=1)
+markup.add(types.InlineKeyboardButton("Записаться к мастеру", callback_data=str(selected_master)))
+bot.send_message(message.chat.id, "Вы выбрали {} у мастера {}. Нажмите кнопку "Записаться к мастеру" для продолжения.".format(service, master), reply_markup=markup)
+
+#Обработчик нажатия на кнопку "Записаться к мастеру"
+
+@bot.callback_query_handler(func=lambda call: True)
+def make_appointment(call):
+selected_master = eval(call.data)
+bot.send_message(call.message.chat.id, "Вы записались на {} к мастеру {}. Спасибо!".format(selected_master["service"], selected_master["master"]))
 
 bot.polling()
