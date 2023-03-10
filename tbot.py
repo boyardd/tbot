@@ -64,8 +64,7 @@ def select_master(message, service):
 @bot.callback_query_handler(func=lambda call: True)
 def make_appointment(call):
     selected_master = eval(call.data)
-    bot.send_message(call.message.chat.id, "Вы записались на {} к мастеру {}. Спасибо!".format(selected_master["service"], selected_master["master"]))
+    bot.send_message(call.message.chat.id, f"Вы записались к мастеру на {time} часов")
 
-# мы Запускаем бота
-if name == 'main':
-bot.polling(none_stop=True)
+if __name__ == "__main__":
+    bot.polling(none_stop=True)
